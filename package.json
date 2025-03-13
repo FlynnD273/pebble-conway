@@ -1,13 +1,17 @@
 {
   "name": "Conway's Game of Life",
-  "author": "MakeAwesomeHappen",
+  "author": "Flynn Duniho",
   "version": "1.0.0",
   "keywords": [
     "pebble-app"
   ],
-  "private": true,
-  "dependencies": {},
+  "dependencies": {
+    "pebble-clay": "^1.0.1"
+  },
   "pebble": {
+    "capabilities": [
+      "configurable"
+    ],
     "displayName": "Conway",
     "uuid": "26d396de-37ee-421c-a483-5966c5f1247d",
     "sdkVersion": "3",
@@ -21,8 +25,22 @@
     "watchapp": {
       "watchface": false
     },
+    "messageKeys": [
+      "EdgeWrap",
+      "FPS",
+      "CellSize",
+      "BGColor",
+      "FGColor"
+    ],
     "resources": {
-      "media": []
+      "media": [
+        {
+          "file": "images/face.png",
+          "menuIcon": true,
+          "name": "MENU_ICON",
+          "type": "bitmap"
+        }
+      ]
     }
   }
 }

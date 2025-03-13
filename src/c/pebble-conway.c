@@ -1,17 +1,25 @@
 #include <pebble.h>
 
+#define SETTINGS_KEY 1
+
+typedef struct ClaySettings {
+  uint8_t fps;
+  uint8_t cell_size;
+  bool wrap_edges;
+  GColor fg_color;
+  GColor bg_color;
+} ClaySettings;
+
+static ClaySettings settings;
+
 static Window *s_main_window;
 static Layer *s_layer;
 static int width;
 static int height;
 static int frame = 0;
 
-static int fps = 12;
-
-static uint16_t cell_size = 5;
 static int rows;
 static int cols;
-static uint8_t wrap_edges = true;
 
 #define MAX(a, b) a > b ? a : b
 #define MIN(a, b) a < b ? a : b
@@ -28,7 +36,7 @@ static uint8_t get_byte(size_t i) {
 }
 
 static uint8_t get_cell(int x, int y) {
-  if (wrap_edges || (x >= 0 && x < cols && y >= 0 && y < rows)) {
+  if (settings.wrap_edges || (x >= 0 && x < cols && y >= 0 && y < rows)) {
     size_t idx = ((y + rows) % rows) * cols + ((x + cols) % cols);
     size_t actual_idx = idx / 8;
     size_t shift = 7 - (idx % 8);
@@ -59,9 +67,11 @@ static void frame_redraw(Layer *layer, GContext *ctx) {
         shift = 8;
       }
       graphics_context_set_fill_color(
-          ctx, ((val >> --shift) & 1) ? GColorBlack : GColorWhite);
-      graphics_fill_rect(
-          ctx, GRect(x * cell_size, y * cell_size, cell_size, cell_size), 0, 0);
+          ctx, ((val >> --shift) & 1) ? settings.fg_color : settings.bg_color);
+      graphics_fill_rect(ctx,
+                         GRect(x * settings.cell_size, y * settings.cell_size,
+                               settings.cell_size, settings.cell_size),
+                         0, 0);
     }
   }
 }
@@ -109,15 +119,15 @@ static void next_gen() {
 }
 
 static void new_frame(void *data) {
-  app_timer_register(1000 / fps, new_frame, NULL);
+  app_timer_register(1000 / settings.fps, new_frame, NULL);
   next_gen();
   layer_mark_dirty(s_layer);
 }
 
 static void reset() {
   frame = 0;
-  cols = width / cell_size;
-  rows = height / cell_size;
+  cols = width / settings.cell_size;
+  rows = height / settings.cell_size;
   size_t len = (rows * cols + 7) / 8;
   free(cells);
   free(cells2);
@@ -154,14 +164,66 @@ static void main_window_unload(Window *window) {
   free(cells2);
 }
 
+static void default_settings() {
+  settings.fps = 12;
+  settings.cell_size = 5;
+  settings.wrap_edges = true;
+  settings.fg_color = GColorBlack;
+  settings.bg_color = GColorWhite;
+}
+
+static void load_settings() {
+  default_settings();
+  persist_read_data(SETTINGS_KEY, &settings, sizeof(settings));
+}
+
+static void save_settings() {
+  persist_write_data(SETTINGS_KEY, &settings, sizeof(settings));
+}
+
+static void inbox_received_handler(DictionaryIterator *iter, void *context) {
+  bool should_reset = false;
+
+  Tuple *wrap_edge_t = dict_find(iter, MESSAGE_KEY_EdgeWrap);
+  if (wrap_edge_t) {
+    settings.wrap_edges = wrap_edge_t->value->int32 == 1;
+  }
+  Tuple *fps_t = dict_find(iter, MESSAGE_KEY_FPS);
+  if (fps_t) {
+    settings.fps = fps_t->value->int32;
+  }
+  Tuple *cell_size_t = dict_find(iter, MESSAGE_KEY_CellSize);
+  if (cell_size_t) {
+    settings.cell_size = cell_size_t->value->int32;
+    should_reset = true;
+  }
+  Tuple *fg_color_t = dict_find(iter, MESSAGE_KEY_FGColor);
+  if (fg_color_t) {
+    settings.fg_color = GColorFromHEX(fg_color_t->value->int32);
+  }
+  Tuple *bg_color_t = dict_find(iter, MESSAGE_KEY_BGColor);
+  if (bg_color_t) {
+    settings.bg_color = GColorFromHEX(bg_color_t->value->int32);
+    window_set_background_color(s_main_window, settings.bg_color);
+  }
+
+  if (should_reset) {
+    reset();
+  }
+  save_settings();
+}
+
 static void init() {
+  load_settings();
   s_main_window = window_create();
-  window_set_background_color(s_main_window, GColorWhite);
+  window_set_background_color(s_main_window, settings.bg_color);
   window_set_window_handlers(s_main_window, (WindowHandlers){
                                                 .load = main_window_load,
                                                 .unload = main_window_unload,
                                             });
   window_stack_push(s_main_window, true);
+  app_message_register_inbox_received(inbox_received_handler);
+  app_message_open(128, 128);
 }
 
 int main(void) {

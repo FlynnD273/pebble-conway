@@ -1,6 +1,6 @@
 [
   {
-    "directory": "/home/flynn/Documents/Pebble/orbit/",
+    "directory": "/home/flynn/Documents/Pebble/pebble-conway/",
     "arguments": [
       "gcc",
       "-I/home/flynn/Documents/git-misc/rebbletool/sdk/SDKs/4.3/sdk-core/pebble/basalt/include/",
