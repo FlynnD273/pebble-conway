@@ -1,3 +1,4 @@
+#include "hash.h"
 #include <pebble.h>
 
 #define SETTINGS_KEY 1
@@ -26,6 +27,19 @@ static int cols;
 
 static uint8_t *cells;
 static uint8_t *cells2;
+static size_t len;
+static bool is_looping = false;
+
+static uint64_t prev_hash;
+static uint64_t prev2_hash;
+
+static void default_settings() {
+  settings.fps = 12;
+  settings.cell_size = 10;
+  settings.wrap_edges = true;
+  settings.fg_color = GColorBlack;
+  settings.bg_color = GColorWhite;
+}
 
 static uint8_t get_byte(size_t i) {
   if (frame % 2) {
@@ -114,21 +128,39 @@ static void next_gen() {
   if (shift < 8) {
     set_byte(i, val);
   }
-
-  frame++;
 }
 
 static void new_frame(void *data) {
-  app_timer_register(1000 / settings.fps, new_frame, NULL);
-  next_gen();
+  if (!is_looping) {
+    uint64_t new_hash;
+    if (frame % 2) {
+      new_hash = hash(cells, len);
+    } else {
+      new_hash = hash(cells2, len);
+    }
+    if (new_hash != prev_hash) {
+      app_timer_register(1000 / settings.fps, new_frame, NULL);
+      if (new_hash == prev2_hash) {
+        is_looping = true;
+      } else {
+        prev2_hash = prev_hash;
+        prev_hash = new_hash;
+        next_gen();
+      }
+    }
+  } else {
+    app_timer_register(1000 / settings.fps, new_frame, NULL);
+  }
+  frame++;
   layer_mark_dirty(s_layer);
 }
 
 static void reset() {
+  is_looping = false;
   frame = 0;
   cols = width / settings.cell_size;
   rows = height / settings.cell_size;
-  size_t len = (rows * cols + 7) / 8;
+  len = (rows * cols + 7) / 8;
   free(cells);
   free(cells2);
   cells = malloc(len);
@@ -162,14 +194,6 @@ static void main_window_unload(Window *window) {
   window_destroy(s_main_window);
   free(cells);
   free(cells2);
-}
-
-static void default_settings() {
-  settings.fps = 12;
-  settings.cell_size = 5;
-  settings.wrap_edges = true;
-  settings.fg_color = GColorBlack;
-  settings.bg_color = GColorWhite;
 }
 
 static void load_settings() {
