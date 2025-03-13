@@ -1,0 +1,26 @@
+{
+    "displayName": "Conway",
+    "uuid": "26d396de-37ee-421c-a483-5966c5f1247d",
+    "sdkVersion": "3",
+    "enableMultiJS": true,
+    "targetPlatforms": [
+        "aplite",
+        "basalt",
+        "chalk",
+        "diorite"
+    ],
+    "watchapp": {
+        "watchface": false
+    },
+    "resources": {
+        "media": []
+    },
+    "name": "Conway's Game of Life",
+    "shortName": "Conway",
+    "longName": "Conway",
+    "versionLabel": "1.0",
+    "companyName": "MakeAwesomeHappen",
+    "messageKeys": {},
+    "appKeys": {},
+    "capabilities": []
+}
