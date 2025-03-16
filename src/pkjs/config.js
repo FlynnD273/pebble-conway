@@ -52,13 +52,15 @@ module.exports = [
         "type": "color",
         "messageKey": "FGColor",
         "label": "Foreground color",
-        "defaultValue": "0x000000"
+        "defaultValue": "0x000000",
+        "allowGray": true
       },
       {
         "type": "color",
         "messageKey": "BGColor",
         "label": "Background color",
-        "defaultValue": "0xFFFFFF"
+        "defaultValue": "0xFFFFFF",
+        "allowGray": true
       }
     ]
   },
