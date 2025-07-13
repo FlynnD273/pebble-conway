@@ -3,7 +3,7 @@
     "directory": "/home/flynn/Documents/Pebble/pebble-conway/",
     "arguments": [
       "gcc",
-      "-I/home/flynn/Documents/git-misc/rebbletool/sdk/SDKs/4.3/sdk-core/pebble/basalt/include/",
+      "-I/home/flynn/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/include/",
       "-Ibuild/include/",
       "-Ibuild/basalt/"
     ],
