@@ -32,6 +32,7 @@ static bool is_looping = false;
 
 static uint64_t prev_hash;
 static uint64_t prev2_hash;
+static AppTimer *timer;
 
 static void default_settings() {
   settings.fps = 12;
@@ -138,10 +139,13 @@ static void new_frame(void *data) {
     } else {
       new_hash = hash(cells2, len);
     }
-    if (new_hash != prev_hash) {
-      app_timer_register(1000 / settings.fps, new_frame, NULL);
+    if (new_hash == prev_hash) {
+      timer = NULL;
+    } else {
+      timer = app_timer_register(1000 / settings.fps, new_frame, NULL);
       if (new_hash == prev2_hash) {
         is_looping = true;
+        timer = NULL;
       } else {
         prev2_hash = prev_hash;
         prev_hash = new_hash;
@@ -149,7 +153,7 @@ static void new_frame(void *data) {
       }
     }
   } else {
-    app_timer_register(1000 / settings.fps, new_frame, NULL);
+    timer = app_timer_register(1000 / settings.fps, new_frame, NULL);
   }
   frame++;
   layer_mark_dirty(s_layer);
@@ -170,6 +174,9 @@ static void reset() {
     cells[i] = val;
     cells2[i] = val;
   }
+  if (timer == NULL) {
+    new_frame(NULL);
+  }
 }
 
 static void accel_data_handler(AccelAxisType axis, int32_t count) { reset(); }
@@ -186,7 +193,6 @@ static void main_window_load(Window *window) {
   layer_set_update_proc(s_layer, frame_redraw);
   layer_mark_dirty(s_layer);
   accel_tap_service_subscribe(accel_data_handler);
-  new_frame(NULL);
 }
 
 static void main_window_unload(Window *window) {
