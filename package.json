@@ -1,46 +1,47 @@
 {
-  "name": "Conway's Game of Life",
-  "author": "Flynn Duniho",
-  "version": "1.4.0",
-  "keywords": [
-    "pebble-app"
-  ],
-  "dependencies": {
-    "pebble-clay": "^1.0.1"
-  },
-  "pebble": {
-    "capabilities": [
-      "configurable"
-    ],
-    "displayName": "Conway",
-    "uuid": "26d396de-37ee-421c-a483-5966c5f1247d",
-    "sdkVersion": "3",
-    "enableMultiJS": true,
-    "targetPlatforms": [
-      "aplite",
-      "basalt",
-      "chalk",
-      "diorite"
-    ],
-    "watchapp": {
-      "watchface": false
-    },
-    "messageKeys": [
-      "EdgeWrap",
-      "FPS",
-      "CellSize",
-      "BGColor",
-      "FGColor"
-    ],
-    "resources": {
-      "media": [
-        {
-          "file": "images/face.png",
-          "menuIcon": true,
-          "name": "MENU_ICON",
-          "type": "bitmap"
-        }
-      ]
-    }
-  }
+	"name": "Conway's Game of Life",
+	"author": "Flynn Duniho",
+	"version": "1.5.0",
+	"keywords": [
+		"pebble-app"
+	],
+	"dependencies": {
+		"@rebble/clay": "^1.0.6"
+	},
+	"pebble": {
+		"capabilities": [
+			"configurable"
+		],
+		"displayName": "Conway",
+		"uuid": "26d396de-37ee-421c-a483-5966c5f1247d",
+		"sdkVersion": "3",
+		"enableMultiJS": true,
+		"targetPlatforms": [
+			"aplite",
+			"basalt",
+			"chalk",
+			"diorite",
+			"emery"
+		],
+		"watchapp": {
+			"watchface": false
+		},
+		"messageKeys": [
+			"EdgeWrap",
+			"FPS",
+			"CellSize",
+			"BGColor",
+			"FGColor"
+		],
+		"resources": {
+			"media": [
+				{
+					"file": "images/face.png",
+					"menuIcon": true,
+					"name": "MENU_ICON",
+					"type": "bitmap"
+				}
+			]
+		}
+	}
 }
